@@ -222,7 +222,6 @@ class Bomber(commands.Cog):
 
     # ── /help ──
     @discord.slash_command(name="help", description="ℹ️》راهنما")
-    @allowed_channel()
     async def help_command(self, ctx: discord.ApplicationContext):
         embed = discord.Embed(title="ℹ️》HELP", description="**💣》SR-ROOT-BOMBER v2.0**", color=config.INFO_COLOR)
         embed.add_field(name="💣》`/bomb`", value="شروع بمباران SMS/Call", inline=False)
