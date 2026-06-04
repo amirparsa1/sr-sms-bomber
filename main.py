@@ -8,7 +8,7 @@ intents.message_content = True
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix="!", intents=intents, help_command=None)
+        super().__init__(command_prefix=".", intents=intents, help_command=None)
         self.start_time = None
         self.total_bombs = 0
 
@@ -31,7 +31,7 @@ class Bot(commands.Bot):
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
-            await ctx.reply("❌》کامند پیدا نشد! `!help` رو بزن.", delete_after=5)
+            await ctx.reply("❌》کامند پیدا نشد! `.help` رو بزن.", delete_after=5)
         elif isinstance(error, commands.CheckFailure):
             return
         else:
