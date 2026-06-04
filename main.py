@@ -22,6 +22,26 @@ class Bot(commands.Bot):
         print(f"[✓] Servers: {len(self.guilds)}")
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="💣》SR-ROOT-BOMBER"))
 
+    async def on_message(self, message):
+        # فقط توی چنل مجاز به کامندها گوش بده
+        if message.channel.id != config.ALLOWED_CHANNEL_ID:
+            return
+        
+        # اگه پیام با پرفیکس ! شروع بشه
+        if message.content.startswith("!"):
+            await self.process_commands(message)
+
+    async def on_command_error(self, ctx, error):
+        # همه خطاها رو بی‌صدا رد کن
+        if isinstance(error, commands.CommandNotFound):
+            return
+        elif isinstance(error, commands.MissingPermissions):
+            return
+        elif isinstance(error, commands.CheckFailure):
+            return
+        else:
+            print(f"[ERROR] {error}")
+
 bot = Bot()
 
 if __name__ == "__main__":
