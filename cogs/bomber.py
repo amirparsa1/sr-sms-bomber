@@ -4,14 +4,16 @@ import config
 import asyncio
 import time
 from datetime import datetime
-from Plugins.my_handler import Functions
-from Plugins.api_list import handler
+from os import path
+from Plugins.my_handler import Handler
+from Plugins.api_list import handler as api_handler
 
 
 class Bomber(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cooldowns = {}
+        self.handler = Handler()
 
     # ── ADMIN CHECK ──
     def is_admin():
@@ -87,6 +89,10 @@ class Bomber(commands.Cog):
             return True
         return commands.check(predicate)
 
+    # ── PROXY CHECK ──
+    def proxy_state():
+        return path.exists("./proxies.txt")
+
     # ── /bomb ──
     @discord.slash_command(name="bomb", description="💣》شروع بمباران")
     @has_user_role()
@@ -108,7 +114,7 @@ class Bomber(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
             return
 
-        api_count = handler.sms_api_count if bomb_type == "sms" else handler.call_api_count
+        api_count = self.handler.sms_api_count if bomb_type == "sms" else self.handler.call_api_count
         if api_count == 0:
             embed = discord.Embed(title="⚠️》NO API", description=f"API برای {bomb_type.upper()} نیست!", color=config.WARNING_COLOR)
             await ctx.respond(embed=embed, ephemeral=True)
@@ -131,7 +137,7 @@ class Bomber(commands.Cog):
 
         success = failed = 0
         st = time.time()
-        func = handler.send_sms if bomb_type == "sms" else handler.send_call
+        func = self.handler.send_sms if bomb_type == "sms" else self.handler.send_call
 
         for i in range(spam_count):
             try:
@@ -179,9 +185,9 @@ class Bomber(commands.Cog):
     @has_user_role()
     @allowed_channel()
     async def status(self, ctx: discord.ApplicationContext):
-        sms = handler.sms_api_count
-        call = handler.call_api_count
-        proxy = "🟢 ON" if Functions.proxy_state() else "🔴 OFF"
+        sms = self.handler.sms_api_count
+        call = self.handler.call_api_count
+        proxy = "🟢 ON" if self.proxy_state() else "🔴 OFF"
         uptime = str(datetime.utcnow() - self.bot.start_time).split('.')[0] if self.bot.start_time else "N/A"
 
         embed = discord.Embed(title="📊》STATUS", color=config.INFO_COLOR)
@@ -201,10 +207,11 @@ class Bomber(commands.Cog):
         await ctx.respond(embed=embed)
         try:
             import importlib
-            importlib.reload(handler)
+            importlib.reload(api_handler)
+            self.handler = Handler()
             embed_success = discord.Embed(
                 title="✅》RELOADED!",
-                description=f"SMS: `{handler.sms_api_count}` | Call: `{handler.call_api_count}`",
+                description=f"SMS: `{self.handler.sms_api_count}` | Call: `{self.handler.call_api_count}`",
                 color=config.SUCCESS_COLOR
             )
             embed_success.set_footer(text="💣》SR-ROOT-BOMBER")
