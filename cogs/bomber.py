@@ -29,7 +29,7 @@ class Bomber(commands.Cog):
                 color=config.ERROR_COLOR
             )
             embed.set_footer(text="💣》SR-ROOT-BOMBER")
-            await ctx.respond(embed=embed, ephemeral=True)
+            await ctx.reply(embed=embed, delete_after=5)
             return False
         return commands.check(predicate)
 
@@ -50,7 +50,7 @@ class Bomber(commands.Cog):
                 color=config.ERROR_COLOR
             )
             embed.set_footer(text="💣》SR-ROOT-BOMBER")
-            await ctx.respond(embed=embed, ephemeral=True)
+            await ctx.reply(embed=embed, delete_after=5)
             return False
         return commands.check(predicate)
 
@@ -65,7 +65,7 @@ class Bomber(commands.Cog):
                 color=config.WARNING_COLOR
             )
             embed.set_footer(text="💣》SR-ROOT-BOMBER")
-            await ctx.respond(embed=embed, ephemeral=True)
+            await ctx.reply(embed=embed, delete_after=5)
             return False
         return commands.check(predicate)
 
@@ -83,7 +83,7 @@ class Bomber(commands.Cog):
                         description=f"🔥 **{rem:.1f}s** صبر کن!",
                         color=config.WARNING_COLOR
                     )
-                    await ctx.respond(embed=embed, ephemeral=True)
+                    await ctx.reply(embed=embed, delete_after=5)
                     return False
             ctx.cog.cooldowns[uid] = now
             return True
@@ -93,61 +93,73 @@ class Bomber(commands.Cog):
     def proxy_state():
         return path.exists("./proxies.txt")
 
-    # ── /bomb ──
-    @discord.slash_command(name="bomb", description="💣》شروع بمباران")
+    # ── !bomb ──
+    @commands.command(name="bomb", aliases=["b"], help="💣 بمباران SMS/Call")
     @has_user_role()
     @allowed_channel()
     @cooldown()
-    async def bomb(
-        self,
-        ctx: discord.ApplicationContext,
-        bomb_type: discord.Option(str, "نوع", choices=[
-            discord.OptionChoice(name="📱》SMS", value="sms"),
-            discord.OptionChoice(name="📞》CALL", value="call"),
-        ]),
-        phone_number: discord.Option(str, "شماره (09123456789)"),
-        spam_count: discord.Option(int, "تعداد", min_value=1, max_value=config.MAX_SPAM_COUNT, default=10),
-    ):
-        phone_number = phone_number.strip()
-        if not (phone_number.isnumeric() and phone_number.startswith("09") and len(phone_number) == 11):
-            embed = discord.Embed(title="❌》INVALID", description="فرمت: `09123456789`", color=config.ERROR_COLOR)
-            await ctx.respond(embed=embed, ephemeral=True)
+    async def bomb_cmd(self, ctx, bomb_type: str = None, phone: str = None, count: int = 10):
+        if not bomb_type or not phone:
+            embed = discord.Embed(
+                title="❌》USAGE",
+                description="`!bomb <sms/call> <09xxxxxxxxx> <count>`\nمثال: `!bomb sms 09123456789 20`",
+                color=config.ERROR_COLOR
+            )
+            embed.set_footer(text="💣》SR-ROOT-BOMBER")
+            await ctx.reply(embed=embed)
             return
 
+        bomb_type = bomb_type.lower()
+        if bomb_type not in ["sms", "call"]:
+            embed = discord.Embed(title="❌》INVALID", description="نوع: `sms` یا `call`", color=config.ERROR_COLOR)
+            embed.set_footer(text="💣》SR-ROOT-BOMBER")
+            await ctx.reply(embed=embed)
+            return
+
+        phone = phone.strip()
+        if not (phone.isnumeric() and phone.startswith("09") and len(phone) == 11):
+            embed = discord.Embed(title="❌》INVALID", description="فرمت: `09123456789`", color=config.ERROR_COLOR)
+            embed.set_footer(text="💣》SR-ROOT-BOMBER")
+            await ctx.reply(embed=embed)
+            return
+
+        count = min(count, config.MAX_SPAM_COUNT)
         api_count = self.handler.sms_api_count if bomb_type == "sms" else self.handler.call_api_count
+
         if api_count == 0:
             embed = discord.Embed(title="⚠️》NO API", description=f"API برای {bomb_type.upper()} نیست!", color=config.WARNING_COLOR)
-            await ctx.respond(embed=embed, ephemeral=True)
+            embed.set_footer(text="💣》SR-ROOT-BOMBER")
+            await ctx.reply(embed=embed)
             return
 
         embed_start = discord.Embed(
             title="🔥》ATTACK STARTED",
-            description=f"**🎯:** `{phone_number}` | **💣:** `{bomb_type.upper()}` | **📊:** `{spam_count}`",
+            description=f"**🎯:** `{phone}` | **💣:** `{bomb_type.upper()}` | **📊:** `{count}`",
             color=config.EMBED_COLOR
         )
         embed_start.set_footer(text="💣》SR-ROOT-BOMBER")
-        await ctx.respond(embed=embed_start)
+        await ctx.reply(embed=embed_start)
 
         embed_prog = discord.Embed(title=f"💣》BOMBING {bomb_type.upper()}...", color=config.EMBED_COLOR)
-        embed_prog.add_field(name="📊》Progress", value=f"`0/{spam_count}`", inline=True)
+        embed_prog.add_field(name="📊》Progress", value=f"`0/{count}`", inline=True)
         embed_prog.add_field(name="✅》Success", value="`0`", inline=True)
         embed_prog.add_field(name="❌》Failed", value="`0`", inline=True)
         embed_prog.set_footer(text="💣》SR-ROOT-BOMBER")
-        msg = await ctx.channel.send(embed=embed_prog)
+        msg = await ctx.send(embed=embed_prog)
 
         success = failed = 0
         st = time.time()
         func = self.handler.send_sms if bomb_type == "sms" else self.handler.send_call
 
-        for i in range(spam_count):
+        for i in range(count):
             try:
-                func(phone_number)
+                func(phone)
                 success += 1
             except:
                 failed += 1
-            if (i + 1) % 5 == 0 or i == spam_count - 1:
+            if (i + 1) % 5 == 0 or i == count - 1:
                 embed_prog.clear_fields()
-                embed_prog.add_field(name="📊》Progress", value=f"`{i+1}/{spam_count}`", inline=True)
+                embed_prog.add_field(name="📊》Progress", value=f"`{i+1}/{count}`", inline=True)
                 embed_prog.add_field(name="✅》Success", value=f"`{success}`", inline=True)
                 embed_prog.add_field(name="❌》Failed", value=f"`{failed}`", inline=True)
                 embed_prog.set_footer(text="💣》SR-ROOT-BOMBER")
@@ -159,7 +171,7 @@ class Bomber(commands.Cog):
 
         tt = time.time() - st
         self.bot.total_bombs += 1
-        rate = (success / spam_count) * 100 if spam_count else 0
+        rate = (success / count) * 100 if count else 0
         if rate >= 80:
             c, e = config.SUCCESS_COLOR, "✅"
         elif rate >= 50:
@@ -169,10 +181,10 @@ class Bomber(commands.Cog):
 
         embed_final = discord.Embed(
             title=f"{e}》ATTACK FINISHED",
-            description=f"**🎯:** `{phone_number}` | **💣:** `{bomb_type.upper()}`",
+            description=f"**🎯:** `{phone}` | **💣:** `{bomb_type.upper()}`",
             color=c
         )
-        embed_final.add_field(name="📊》Total", value=f"`{spam_count}`", inline=True)
+        embed_final.add_field(name="📊》Total", value=f"`{count}`", inline=True)
         embed_final.add_field(name="✅》Success", value=f"`{success}`", inline=True)
         embed_final.add_field(name="❌》Failed", value=f"`{failed}`", inline=True)
         embed_final.add_field(name="📈》Rate", value=f"`{rate:.1f}%`", inline=True)
@@ -180,11 +192,11 @@ class Bomber(commands.Cog):
         embed_final.set_footer(text="💣》SR-ROOT-BOMBER")
         await msg.edit(embed=embed_final)
 
-    # ── /status ──
-    @discord.slash_command(name="status", description="📊》وضعیت سیستم")
+    # ── !status ──
+    @commands.command(name="status", aliases=["st"], help="📊 وضعیت سیستم")
     @has_user_role()
     @allowed_channel()
-    async def status(self, ctx: discord.ApplicationContext):
+    async def status_cmd(self, ctx):
         sms = self.handler.sms_api_count
         call = self.handler.call_api_count
         proxy = "🟢 ON" if self.proxy_state() else "🔴 OFF"
@@ -196,15 +208,16 @@ class Bomber(commands.Cog):
         embed.add_field(name="💣》Bombs", value=f"`{self.bot.total_bombs}`", inline=True)
         embed.add_field(name="⏱️》Uptime", value=f"`{uptime}`", inline=True)
         embed.set_footer(text="💣》SR-ROOT-BOMBER")
-        await ctx.respond(embed=embed)
+        await ctx.reply(embed=embed)
 
-    # ── /reload ──
-    @discord.slash_command(name="reload", description="🔄》ریست API (ادمین)")
+    # ── !reload ──
+    @commands.command(name="reload", aliases=["rl"], help="🔄 ریست API (ادمین)")
     @is_admin()
     @allowed_channel()
-    async def reload_apis(self, ctx: discord.ApplicationContext):
+    async def reload_cmd(self, ctx):
         embed = discord.Embed(title="🔄》RELOADING...", color=config.INFO_COLOR)
-        await ctx.respond(embed=embed)
+        embed.set_footer(text="💣》SR-ROOT-BOMBER")
+        msg = await ctx.reply(embed=embed)
         try:
             import importlib
             importlib.reload(api_handler)
@@ -215,20 +228,26 @@ class Bomber(commands.Cog):
                 color=config.SUCCESS_COLOR
             )
             embed_success.set_footer(text="💣》SR-ROOT-BOMBER")
-            await ctx.edit(embed=embed_success)
+            await msg.edit(embed=embed_success)
         except Exception as e:
             embed_error = discord.Embed(title="❌》ERROR", description=f"```{e}```", color=config.ERROR_COLOR)
-            await ctx.edit(embed=embed_error)
+            embed_error.set_footer(text="💣》SR-ROOT-BOMBER")
+            await msg.edit(embed=embed_error)
 
-    # ── /help ──
-    @discord.slash_command(name="help", description="ℹ️》راهنما")
-    async def help_command(self, ctx: discord.ApplicationContext):
-        embed = discord.Embed(title="ℹ️》HELP", description="**💣》SR-ROOT-BOMBER v2.0**", color=config.INFO_COLOR)
-        embed.add_field(name="💣》`/bomb`", value="شروع بمباران SMS/Call", inline=False)
-        embed.add_field(name="📊》`/status`", value="وضعیت سیستم", inline=False)
-        embed.add_field(name="🔄》`/reload`", value="ریست API (ادمین)", inline=False)
+    # ── !help ──
+    @commands.command(name="help", aliases=["h"], help="ℹ️ راهنما")
+    async def help_cmd(self, ctx):
+        embed = discord.Embed(
+            title="ℹ️》HELP",
+            description="**💣》SR-ROOT-BOMBER v2.0**",
+            color=config.INFO_COLOR
+        )
+        embed.add_field(name="💣》`!bomb <sms/call> <09xx> <count>`", value="شروع بمباران", inline=False)
+        embed.add_field(name="📊》`!status`", value="وضعیت سیستم", inline=False)
+        embed.add_field(name="🔄》`!reload`", value="ریست API (ادمین)", inline=False)
+        embed.add_field(name="ℹ️》`!help`", value="این راهنما", inline=False)
         embed.set_footer(text="💣》SR-ROOT-BOMBER | SR ROOT TEAM")
-        await ctx.respond(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot):

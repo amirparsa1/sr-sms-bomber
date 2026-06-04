@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 import config
 import sys
-import asyncio
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -10,14 +9,15 @@ intents.message_content = True
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents, help_command=None)
+        self.start_time = None
         self.total_bombs = 0
 
     async def setup_hook(self):
         await self.load_extension("cogs.bomber")
-        await self.sync_commands()
-        print("[✓] Commands Synced!")
+        print("[✓] Cogs Loaded!")
 
     async def on_ready(self):
+        self.start_time = discord.utils.utcnow()
         print(f"[✓] {self.user.name} Online!")
         print(f"[✓] Servers: {len(self.guilds)}")
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="💣》SR-ROOT-BOMBER"))
