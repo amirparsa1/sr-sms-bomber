@@ -23,20 +23,15 @@ class Bot(commands.Bot):
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="💣》SR-ROOT-BOMBER"))
 
     async def on_message(self, message):
-        # فقط توی چنل مجاز به کامندها گوش بده
+        if message.author.bot:
+            return
         if message.channel.id != config.ALLOWED_CHANNEL_ID:
             return
-        
-        # اگه پیام با پرفیکس ! شروع بشه
-        if message.content.startswith("!"):
-            await self.process_commands(message)
+        await self.process_commands(message)
 
     async def on_command_error(self, ctx, error):
-        # همه خطاها رو بی‌صدا رد کن
         if isinstance(error, commands.CommandNotFound):
-            return
-        elif isinstance(error, commands.MissingPermissions):
-            return
+            await ctx.reply("❌》کامند پیدا نشد! `!help` رو بزن.", delete_after=5)
         elif isinstance(error, commands.CheckFailure):
             return
         else:
