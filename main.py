@@ -39,6 +39,20 @@ class Bot(commands.Bot):
 
 bot = Bot()
 
+@bot.command(name="help")
+async def help_cmd(ctx):
+    embed = discord.Embed(
+        title="ℹ️》HELP",
+        description="**💣》SR-ROOT-BOMBER v2.0**",
+        color=config.INFO_COLOR
+    )
+    embed.add_field(name="💣》`.bomb <sms/call> <09xx> <count>`", value="شروع بمباران", inline=False)
+    embed.add_field(name="📊》`.status`", value="وضعیت سیستم", inline=False)
+    embed.add_field(name="🔄》`.reload`", value="ریست API (ادمین)", inline=False)
+    embed.add_field(name="ℹ️》`.help`", value="این راهنما", inline=False)
+    embed.set_footer(text="💣》SR-ROOT-BOMBER | SR ROOT TEAM")
+    await ctx.reply(embed=embed)
+
 if __name__ == "__main__":
     if config.BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
         print("[!] Token not set! Edit config.py")
