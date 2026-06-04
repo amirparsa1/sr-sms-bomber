@@ -1,0 +1,25 @@
+# ╔══════════════════════════════════════╗
+# ║     💣》SR-ROOT-BOMBER CONFIG        ║
+# ╚══════════════════════════════════════╝
+
+BOT_TOKEN = ""
+
+ADMIN_ROLE_ID = 1511842399251337296
+
+USER_ROLE_ID = 1511873482391290069
+
+ALLOWED_CHANNEL_ID = 1511876033064861707
+
+
+EMBED_COLOR = 0x00FF00
+SUCCESS_COLOR = 0x00FF41     
+ERROR_COLOR = 0x39FF14  
+INFO_COLOR = 0x00CC00         
+WARNING_COLOR = 0x7FFF00    
+
+
+MAX_SPAM_COUNT = 100
+COOLDOWN_SECONDS = 30
+
+
+PROXY_FILE = "proxies.txt"
