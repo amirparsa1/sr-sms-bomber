@@ -223,4 +223,4 @@ Copyright (c) 2024 SR ROOT TEAM
 
     📢 Share with friends
 
-<p align="center"> <img src="https://img.shields.io/badge/MADE WITH ❤️ BY-SR ROOT TEAM-00FF00?style=for-the-badge&labelColor=000000"/> </p><p align="center"> <sub>💣》SR-ROOT-BOMBER v2.0 | © 2024 SR ROOT TEAM</sub> </p> ```
+<p align="center"> <img src="https://img.shields.io/badge/MADE WITH ❤️ BY-SR ROOT TEAM-00FF00?style=for-the-badge&labelColor=000000"/> </p><p align="center"> <sub>💣》SR-ROOT-BOMBER v4.4 | © 2026 SR ROOT TEAM</sub> </p> ```
